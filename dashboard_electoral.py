@@ -452,16 +452,28 @@ with col2:
 
 st.markdown("---")
 seccion("📋 Tabla completa por puesto")
-cols_tabla = ['zona','nombre_puesto','votos_camilo','votos_carvalho_2022',
-              'votos_sanchez','votos_nanclares','votos_creemos','votos_pacto','votos_cd_total',
-              col_modo('camilo'), col_modo('carvalho'), col_modo('sanchez'),
-              col_modo('nanclares'), col_modo('creemos'), col_modo('pacto'), col_modo('cd')]
-tabla = df[cols_tabla].sort_values('votos_camilo', ascending=False).reset_index(drop=True)
-tabla.index += 1
-tabla.columns = ['Zona','Puesto','Camilo','Carvalho 2022','Sánchez','Nanclares',
-                 'Creemos','Pacto','Centro Democrático',
-                 f'Camilo {modo}', f'Carvalho {modo}', f'Sánchez {modo}',
-                 f'Nanclares {modo}', f'Creemos {modo}', f'Pacto {modo}', f'CD {modo}']
+_cols_base = ['zona','nombre_puesto','votos_camilo','votos_carvalho_2022',
+              'votos_sanchez','votos_nanclares','votos_creemos','votos_pacto','votos_cd_total']
+_nombres_base = ['Zona','Puesto','Camilo','Carvalho 2022','Sánchez','Nanclares',
+                 'Creemos','Pacto','Centro Democrático']
+
+if modo == "Votos absolutos":
+    # Solo columnas absolutas — sin duplicados
+    tabla = df[_cols_base].sort_values('votos_camilo', ascending=False).reset_index(drop=True)
+    tabla.index += 1
+    tabla.columns = _nombres_base
+else:
+    # Absolutas + columnas relativas formateadas como "X.XX%"
+    _pct_suffix = 'medellin' if modo == "% del total Medellín" else 'zona'
+    _candidatos = ['camilo','carvalho','sanchez','nanclares','creemos','pacto','cd']
+    _cols_pct = [f'pct_{_pct_suffix}_{c}' for c in _candidatos]
+    _nombres_pct = [f'Camilo %', f'Carvalho %', f'Sánchez %',
+                    f'Nanclares %', f'Creemos %', f'Pacto %', f'CD %']
+    tabla = df[_cols_base + _cols_pct].sort_values('votos_camilo', ascending=False).reset_index(drop=True)
+    tabla.index += 1
+    tabla.columns = _nombres_base + _nombres_pct
+    for col in _nombres_pct:
+        tabla[col] = tabla[col].apply(lambda x: f"{x:.2f}%" if pd.notna(x) else "0.00%")
 st.dataframe(tabla, use_container_width=True, height=420)
 
 st.markdown("---")
