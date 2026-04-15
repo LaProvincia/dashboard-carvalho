@@ -57,8 +57,15 @@ st.markdown(f"""
 """, unsafe_allow_html=True)
 
 # ── Datos ─────────────────────────────────────────────────────────────────────
+import os as _os
+
+def _csv_version():
+    p = "puestos_medellin_FINAL.csv"
+    s = _os.stat(p)
+    return f"{s.st_mtime}_{s.st_size}"
+
 @st.cache_data
-def cargar():
+def cargar(version=""):
     df = pd.read_csv("puestos_medellin_FINAL.csv")
     # Asegurar tipos numéricos
     for col in df.columns:
@@ -68,7 +75,7 @@ def cargar():
     df['lon'] = pd.to_numeric(df['lon'], errors='coerce')
     return df
 
-df = cargar()
+df = cargar(version=_csv_version())
 
 prom_camilo   = df['votos_camilo'].mean()
 prom_carvalho = df['votos_carvalho_2022'].mean()
