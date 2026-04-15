@@ -444,10 +444,18 @@ with col1:
                           margin={"r":0,"t":0,"l":0,"b":0}, height=350, paper_bgcolor=CREMA, showlegend=False)
     st.plotly_chart(fig_con, use_container_width=True)
 with col2:
-    t = df_con[['nombre_puesto','zona','votos_camilo','votos_carvalho_2022',
-                col_modo('camilo'), col_modo('carvalho')]].sort_values('votos_carvalho_2022', ascending=False).reset_index(drop=True)
-    t.index += 1
-    t.columns = ['Puesto','Zona','Camilo (votos)','Carvalho (votos)', f'Camilo ({modo})', f'Carvalho ({modo})']
+    if modo == "Votos absolutos":
+        t = df_con[['nombre_puesto','zona','votos_camilo','votos_carvalho_2022']].sort_values('votos_carvalho_2022', ascending=False).reset_index(drop=True)
+        t.index += 1
+        t.columns = ['Puesto','Zona','Camilo','Carvalho 2022']
+    else:
+        _pct_s = 'medellin' if modo == "% del total Medellín" else 'zona'
+        t = df_con[['nombre_puesto','zona','votos_camilo','votos_carvalho_2022',
+                    f'pct_{_pct_s}_camilo', f'pct_{_pct_s}_carvalho']].sort_values('votos_carvalho_2022', ascending=False).reset_index(drop=True)
+        t.index += 1
+        t.columns = ['Puesto','Zona','Camilo','Carvalho 2022','Camilo %','Carvalho %']
+        t['Camilo %']   = t['Camilo %'].apply(lambda x: f"{x:.2f}%")
+        t['Carvalho %'] = t['Carvalho %'].apply(lambda x: f"{x:.2f}%")
     st.dataframe(t, use_container_width=True, height=580)
 
 st.markdown("---")
