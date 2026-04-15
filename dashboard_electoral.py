@@ -158,15 +158,15 @@ def mapa_simple(df_m, col, titulo_color, escala=None, height=350):
                       paper_bgcolor=CREMA, showlegend=False)
     return fig
 
-def top20(df_m, col, label, col_abs=None):
+def top40(df_m, col, label, col_abs=None):
     # Siempre incluir votos absolutos si estamos en modo relativo
     if col_abs and col_abs != col:
-        top = df_m.nlargest(20, col)[['nombre_puesto','zona', col_abs, col]].reset_index(drop=True)
+        top = df_m.nlargest(40, col)[['nombre_puesto','zona', col_abs, col]].reset_index(drop=True)
         top.index += 1
         top[col] = top[col].apply(fmt)
         top.columns = ['Puesto','Zona','Votos', label]
     else:
-        top = df_m.nlargest(20, col)[['nombre_puesto','zona', col]].reset_index(drop=True)
+        top = df_m.nlargest(40, col)[['nombre_puesto','zona', col]].reset_index(drop=True)
         top.index += 1
         top[col] = top[col].apply(fmt)
         top.columns = ['Puesto','Zona', label]
@@ -195,16 +195,18 @@ c7.metric("Centro Democrático",   f"{df['votos_cd_total'].sum():,}")
 
 st.markdown("---")
 seccion("Promedio de votos por puesto de votación")
-d1,d2,d3,d4,d5 = st.columns(5)
+d1,d2,d3,d4,d5,d6,d7 = st.columns(7)
 d1.metric("Promedio Camilo",    f"{prom_camilo:.1f}")
 d2.metric("Promedio Sánchez",   f"{prom_sanchez:.1f}")
 d3.metric("Promedio Nanclares", f"{prom_nanclares:.1f}")
 d4.metric("Promedio Carvalho",  f"{prom_carvalho:.1f}")
 d5.metric("Promedio Creemos",   f"{prom_creemos:.1f}")
+d6.metric("Promedio Pacto",     f"{prom_pacto:.1f}")
+d7.metric("Promedio CD",        f"{prom_cd:.1f}")
 
 st.markdown(f"""
 > Carvalho promedió **{prom_carvalho:.0f} votos por puesto** en 2022 vs **{prom_camilo:.0f} de Camilo** en 2026 — Carvalho tuvo **{prom_carvalho/prom_camilo:.1f}x más votos por puesto**.
-> Modo actual: **{modo}**
+> Pacto Histórico: **{prom_pacto:.0f}** · Creemos: **{prom_creemos:.0f}** · Centro Democrático: **{prom_cd:.0f}** votos promedio por puesto.
 """)
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -218,7 +220,7 @@ col1, col2 = st.columns([1.6, 1])
 with col1:
     st.plotly_chart(mapa_simple(df, col_carvalho, label_modo('carvalho','Carvalho 2022')), use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_carvalho, label_modo('carvalho','Carvalho 2022'), col_abs='votos_carvalho_2022'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_carvalho, label_modo('carvalho','Carvalho 2022'), col_abs='votos_carvalho_2022'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Votos Camilo 2026 — Mapa y Top 20 puestos")
@@ -227,7 +229,7 @@ col1, col2 = st.columns([1.6, 1])
 with col1:
     st.plotly_chart(mapa_simple(df, col_camilo, label_modo('camilo','Camilo 2026')), use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_camilo, label_modo('camilo','Camilo 2026'), col_abs='votos_camilo'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_camilo, label_modo('camilo','Camilo 2026'), col_abs='votos_camilo'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Votos Alejandra Sánchez 2026 — Mapa y Top 20 puestos")
@@ -238,7 +240,7 @@ with col1:
                                 escala=[[0,'#ffffff'],[0.5,'#A8D5A2'],[1,VERDE_OSCURO]]),
                     use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_sanchez, label_modo('sanchez','Alejandra Sánchez'), col_abs='votos_sanchez'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_sanchez, label_modo('sanchez','Alejandra Sánchez'), col_abs='votos_sanchez'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Votos Rafael Nanclares 2026 — Mapa y Top 20 puestos")
@@ -249,7 +251,7 @@ with col1:
                                 escala=[[0,'#ffffff'],[0.5,'#A8C8A0'],[1,VERDE_OSCURO]]),
                     use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_nanclares, label_modo('nanclares','Rafael Nanclares'), col_abs='votos_nanclares'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_nanclares, label_modo('nanclares','Rafael Nanclares'), col_abs='votos_nanclares'), use_container_width=True, height=580)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECCIÓN 3 — COMPARACIÓN CAMILO VS CARVALHO
@@ -346,7 +348,7 @@ with col2:
     tabla_sup = df_sup[['nombre_puesto','zona','votos_camilo','votos_carvalho_2022']].sort_values('votos_camilo', ascending=False).reset_index(drop=True)
     tabla_sup.index += 1
     tabla_sup.columns = ['Puesto','Zona','Camilo','Carvalho 2022']
-    st.dataframe(tabla_sup, use_container_width=True, height=370)
+    st.dataframe(tabla_sup, use_container_width=True, height=580)
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECCIÓN 4 — LA COMPETENCIA
@@ -361,7 +363,7 @@ with col1:
                                 escala=[[0,'#ffffff'],[0.5,'#E87070'],[1,'#C0392B']]),
                     use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_pacto, label_modo('pacto','Pacto Histórico'), col_abs='votos_pacto'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_pacto, label_modo('pacto','Pacto Histórico'), col_abs='votos_pacto'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Mapa Creemos + Top 20")
@@ -372,7 +374,7 @@ with col1:
                                 escala=[[0,'#ffffff'],[0.5,'#F0C060'],[1,'#E8A838']]),
                     use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_creemos, label_modo('creemos','Creemos'), col_abs='votos_creemos'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_creemos, label_modo('creemos','Creemos'), col_abs='votos_creemos'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Mapa Centro Democrático — Total partido + Top 20")
@@ -383,7 +385,7 @@ with col1:
                                 escala=[[0,'#ffffff'],[0.5,'#6090D9'],[1,'#1A3A6B']]),
                     use_container_width=True)
 with col2:
-    st.dataframe(top20(df, col_cd, label_modo('cd','Centro Democrático'), col_abs='votos_cd_total'), use_container_width=True, height=370)
+    st.dataframe(top40(df, col_cd, label_modo('cd','Centro Democrático'), col_abs='votos_cd_total'), use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("🗺️ Mapa B — Dominancia por puesto (Creemos vs Pacto vs Centro Democrático)")
@@ -446,18 +448,20 @@ with col2:
                 col_modo('camilo'), col_modo('carvalho')]].sort_values('votos_carvalho_2022', ascending=False).reset_index(drop=True)
     t.index += 1
     t.columns = ['Puesto','Zona','Camilo (votos)','Carvalho (votos)', f'Camilo ({modo})', f'Carvalho ({modo})']
-    st.dataframe(t, use_container_width=True, height=370)
+    st.dataframe(t, use_container_width=True, height=580)
 
 st.markdown("---")
 seccion("📋 Tabla completa por puesto")
 cols_tabla = ['zona','nombre_puesto','votos_camilo','votos_carvalho_2022',
               'votos_sanchez','votos_nanclares','votos_creemos','votos_pacto','votos_cd_total',
-              col_modo('camilo'), col_modo('carvalho'), col_modo('creemos'), col_modo('pacto')]
+              col_modo('camilo'), col_modo('carvalho'), col_modo('sanchez'),
+              col_modo('nanclares'), col_modo('creemos'), col_modo('pacto'), col_modo('cd')]
 tabla = df[cols_tabla].sort_values('votos_camilo', ascending=False).reset_index(drop=True)
 tabla.index += 1
 tabla.columns = ['Zona','Puesto','Camilo','Carvalho 2022','Sánchez','Nanclares',
                  'Creemos','Pacto','Centro Democrático',
-                 f'Camilo {modo}', f'Carvalho {modo}', f'Creemos {modo}', f'Pacto {modo}']
+                 f'Camilo {modo}', f'Carvalho {modo}', f'Sánchez {modo}',
+                 f'Nanclares {modo}', f'Creemos {modo}', f'Pacto {modo}', f'CD {modo}']
 st.dataframe(tabla, use_container_width=True, height=420)
 
 st.markdown("---")
